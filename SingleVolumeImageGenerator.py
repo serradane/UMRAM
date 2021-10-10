@@ -5,6 +5,7 @@ from nilearn import image
 from nilearn import datasets
 from nilearn.image import iter_img
 from nilearn.plotting import plot_glass_brain
+from nilearn.plotting import plot_stat_map
 from nilearn import plotting
 from matplotlib import pyplot as plt
 import os, shutil
@@ -13,21 +14,31 @@ import os, shutil
 
 k=2
 base_dir = 'C:/Users/zehra/Desktop/UMRAM/ABIDE_pcp/cpac/filt_global' # Path to the Original Data Directory which includes 4D fMRI images of ASD and TC
-dump_dir = 'C:/Users/zehra/Desktop/UMRAM/ABIDE_pcp/Data/glass_brain_images'
+glass_dir = 'C:/Users/zehra/Desktop/UMRAM/ABIDE_pcp/Data/glass_brain_images'
+stat_dir = 'C:/Users/zehra/Desktop/UMRAM/ABIDE_pcp/Data/stat_images'
+
 for filename in os.listdir(base_dir):
     if filename.endswith(".nii"):
         print(filename)
         k=k+1
-        my_path = os.path.join(dump_dir, 'preproc' + str(k) + '.nii') # Make a new folder for each subject
-        if not os.path.exists(my_path):
-            os.mkdir(my_path)
+        glass_path = os.path.join(glass_dir, 'preproc_glass' + str(k) + '.nii') # Make a new folder for each subject
+        stat_path = os.path.join(stat_dir, 'preproc_stat' + str(k) + '.nii')
+        if not os.path.exists(glass_path):
+            os.mkdir(glass_path)
+        if not os.path.exists(stat_path):
+            os.mkdir(stat_path) 
         # Import the subject image
         # Function to consider the 4D fMRI image of the subject for generating glass_brain images 
         rsn = os.path.join(base_dir, filename)
         for i, img in enumerate(iter_img(rsn)):
             plotting.plot_glass_brain(img, threshold=3, display_mode="z",
                               cut_coords=1, colorbar=False)
-            plt.savefig(os.path.join(my_path, 'asd%d' % i + ".png"))    
+            plt.savefig(os.path.join(glass_path, 'asd%d' % i + ".png"))
+
+        for i, img in enumerate(iter_img(rsn)):
+            plotting.plot_stat_map(stat_map_img)(img, threshold=5, display_mode="z",
+                              cut_coords=1, colorbar=False)
+            plt.savefig(os.path.join(stat_path, 'asd%d' % i + ".png"))     
         continue
     else:
         continue
