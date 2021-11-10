@@ -10,9 +10,9 @@ from nilearn import plotting
 from matplotlib import pyplot as plt
 import os, shutil
 
-#datasets.fetch_abide_pcp(data_dir='C:/Users/zehra/Desktop/UMRAM', n_subjects=20, pipeline='cpac', band_pass_filtering=True, global_signal_regression=True, derivatives=['func_preproc'])
+#datasets.fetch_abide_pcp(data_dir='C:/Users/zehra/Desktop/UMRAM', n_subjects=10, pipeline='cpac', band_pass_filtering=True, global_signal_regression=True, derivatives=['func_preproc'])
 
-k=2
+k=0
 base_dir = 'C:/Users/zehra/Desktop/UMRAM/ABIDE_pcp/cpac/filt_global' # Path to the Original Data Directory which includes 4D fMRI images of ASD and TC
 glass_dir = 'C:/Users/zehra/Desktop/UMRAM/ABIDE_pcp/Data/glass_brain_images'
 stat_dir = 'C:/Users/zehra/Desktop/UMRAM/ABIDE_pcp/Data/stat_images'
@@ -34,11 +34,13 @@ for filename in os.listdir(base_dir):
             plotting.plot_glass_brain(img, threshold=3, display_mode="z",
                               cut_coords=1, colorbar=False)
             plt.savefig(os.path.join(glass_path, 'asd%d' % i + ".png"))
+            plt.close('all')
 
         for i, img in enumerate(iter_img(rsn)):
-            plotting.plot_stat_map(stat_map_img)(img, threshold=5, display_mode="z",
+            plotting.plot_stat_map(img, threshold=5, display_mode="z",
                               cut_coords=1, colorbar=False)
-            plt.savefig(os.path.join(stat_path, 'asd%d' % i + ".png"))     
+            plt.savefig(os.path.join(stat_path, 'asd%d' % i + ".png"))   
+            plt.close('all')  
         continue
     else:
         continue

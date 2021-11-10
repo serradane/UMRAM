@@ -3,51 +3,42 @@ from tensorflow.keras import layers
 from tensorflow.keras.preprocessing.image import load_img
 from tensorflow.keras.preprocessing.image import img_to_array
 from sklearn.preprocessing import LabelBinarizer
-from sklearn.model_selection import train_test_split
 from imutils import paths
 import numpy as np
-
-
+import random
 
 
 # LOADING IMAGES
 
 # here base_dir will be 
-
+test = []
 glass_dir = 'C:/Users/zehra/Desktop/UMRAM/ABIDE_pcp/Data/glass_brain_images'
 #stat_dir = 'C:/Users/zehra/Desktop/UMRAM/ABIDE_pcp/Data/stat_images'
-imagePaths     = list(paths.list_images(glass_dir))
+
+datalist = os.listdir(glass_dir)
+size = len(datalist)
+train = random.sample(datalist, int(size*0.8))
+for i in datalist:
+    if not i in train:
+        test.append(i)
+
 
 #imagelari split etmek icin 
 def load_imgs(imagePaths, inp_dim):
-	data = []
-	labels = []
-	# loop over the image paths
-	for imagePath in imagePaths:
-		# extract the class label from the filename
-		label = imagePath.split(os.path.sep)[-2]
-
-		image = load_img(imagePath, target_size=(inp_dim, inp_dim))
-		image = img_to_array(image)
-
-		data.append(image)
-		labels.append(label)
-		
-	# convert the data and labels to NumPy arrays
-	data = np.array(data, dtype="float32")
-	labels = np.array(labels)
-	LB = LabelBinarizer()
-	labels = LB.fit_transform(labels)
-	#labels = to_categorical(labels)
-
-	return data, labels
+    data = []
+    for imagePath in imagePaths:
+        for images in os.listdir(os.path.join(glass_dir,imagePath)):
+            image = load_img(images, target_size=(inp_dim, inp_dim))
+            image = img_to_array(image)
+            data.append(image)
+    data = np.array(data, dtype="float32")
+    return data
 
 # BIG ERROR
 # notice here we might mix images from different subjects since imagePaths is somehow ill defined
 # we need to keep different imagePaths for different subjects
-data, labels = load_imgs(imagePaths, 150)
-X_train, X_rem, y_train, y_rem = train_test_split(data, labels, train_size=0.8)
-X_valid, X_test, y_valid, y_test = train_test_split(X_rem,y_rem, test_size=0.5)
+train_data = load_imgs(train, 150)
+test_data= load_imgs(test, 150)
 
 
 
@@ -100,25 +91,24 @@ train_datagen = ImageDataGenerator(
     horizontal_flip=True)
 test_datagen = ImageDataGenerator(rescale=1./255)
 
-"""
+
 train_generator = train_datagen.flow_from_directory(
-    train_dir,
+    train_data,
     target_size=(150, 150),
     batch_size=32,
     class_mode='binary')
 
-validation_generator = test_datagen.flow_from_directory(
-    validation_dir,
+test_generator = test_datagen.flow_from_directory(
+    test_data,
     target_size=(150, 150),
     batch_size=32,
     class_mode='binary')
-"""
 
 history = model.fit_generator(
-    train_datagen.flow(X_train, y_train, batch_size=32),
+    train_generator,
     steps_per_epoch=100,
     epochs=300,
-    validation_data=(X_valid, y_valid),
+    validation_data=test_generator,
     validation_steps=50)
 
 
@@ -159,9 +149,10 @@ test_generator = test_datagen.flow_from_directory(
     target_size=(150, 150),
     batch_size=20,
     class_mode='binary')
-"""
+
 
 test_loss, test_acc = model.evaluate_generator((X_test, y_test), steps=10)
 
 print('test loss: ', test_loss)
 print('test acc: ', test_acc)
+"""
