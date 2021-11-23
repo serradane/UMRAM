@@ -11,33 +11,39 @@ import random
 # LOADING IMAGES
 
 # here base_dir will be 
+testglass = []
+teststat = []
+datalist = []
+train = []
 test = []
 glass_dir = 'C:/Users/zehra/Desktop/UMRAM/ABIDE_pcp/Data/glass_brain_images'
-#stat_dir = 'C:/Users/zehra/Desktop/UMRAM/ABIDE_pcp/Data/stat_images'
+stat_dir = 'C:/Users/zehra/Desktop/UMRAM/ABIDE_pcp/Data/stat_images'
 
-datalist = os.listdir(glass_dir)
-size = len(datalist)
-train = random.sample(datalist, int(size*0.8))
-for i in datalist:
-    if not i in train:
-        test.append(i)
+datalistglass = os.listdir(glass_dir)
+size = len(datalistglass)
+trainglass = random.sample(datalistglass, int(size*0.8))
+for i in datalistglass:
+    if not i in trainglass:
+        testglass.append(i)
 
-# dataliststat = os.listdir(glass_dir)
-# size = len(dataliststat)
-# train = random.sample(dataliststat, int(size*0.8))
-# for i in dataliststat:
-#     if not i in train:
-#         teststat.append(i)
+dataliststat = os.listdir(stat_dir)
+size = len(dataliststat)
+trainstat = random.sample(dataliststat, int(size*0.8))
+for i in dataliststat:
+    if not i in trainstat:
+        teststat.append(i)
+
+
 
 #imagelari split etmek icin 
-def load_imgs(imagePaths, inp_dim):
+def load_imgs(imagePaths, inp_dim, inp_dir):
     data = []
     for imagePath in imagePaths:
-        for subject in os.listdir(os.path.join(glass_dir,imagePath)):
-            print(subject)
-            subject = os.path.join(os.path.join(glass_dir,imagePath), subject)
+        for subject in os.listdir(os.path.join(inp_dir,imagePath)):
+            subject = os.path.join(os.path.join(inp_dir,imagePath), subject)
             image = load_img(subject, target_size=(inp_dim, inp_dim, 3))
             image = img_to_array(image)
+            image /= 255
             data.append(image)
     data = np.array(data, dtype="float32")
     return data
@@ -45,14 +51,22 @@ def load_imgs(imagePaths, inp_dim):
 # BIG ERROR
 # notice here we might mix images from different subjects since imagePaths is somehow ill defined
 # we need to keep different imagePaths for different subjects
-train_data = load_imgs(train, 150)
-test_data= load_imgs(test, 150)
+train_data_glass = load_imgs(trainglass, 150, glass_dir)
+test_data_glass = load_imgs(testglass, 150, glass_dir)
+train_data_stat = load_imgs(trainstat, 150, stat_dir)
+test_data_stat = load_imgs(teststat, 150, stat_dir)
+
+for i in range (len(train_data_glass)):
+    train.append(np.concatenate((train_data_glass[i], train_data_stat[i]), axis=1))
+
+for i in range (len(test_data_glass)):
+    test.append(np.concatenate((test_data_glass[i], test_data_stat[i]), axis=1))
 
 from keras.preprocessing.image import ImageDataGenerator
 
 
 train_datagen = ImageDataGenerator(
-    rescale=1./255,
+    #rescale=1./255,
     rotation_range=40,
     width_shift_range=0.2,
     height_shift_range=0.2,
@@ -61,18 +75,26 @@ train_datagen = ImageDataGenerator(
     horizontal_flip=True)
 test_datagen = ImageDataGenerator(rescale=1./255)
 
+train = np.array(train)
+test = np.array(test)
 
-train_generator = train_datagen.flow_from_directory(
-    train_data,
-    target_size=(150, 150, 3),
+train_generator = train_datagen.flow(
+    train,
+    train,
+    #target_size=(150, 150, 3),
     batch_size=32,
-    class_mode='binary')
+    #class_mode='binary'
+    )
 
-test_generator = test_datagen.flow_from_directory(
-    test_data,
-    target_size=(150, 150, 3),
+test_generator = test_datagen.flow(
+    test,
+    test,
+    #target_size=(150, 150, 3),
     batch_size=32,
-    class_mode='binary')
+    #class_mode='binary'
+    )
+
+
 
 
 # MODEL DEFINITION
@@ -83,7 +105,7 @@ from keras import models
 
 model = models.Sequential()
 model.add(layers.Conv2D(32, (3, 3), activation='relu',
-                        input_shape=(150, 150, 3)))
+                        input_shape=(150, 150, 3, 3)))
 model.add(layers.MaxPooling2D(2, 2))
 model.add(layers.Conv2D(64, (3, 3), activation='relu'))
 model.add(layers.MaxPooling2D(2, 2))
