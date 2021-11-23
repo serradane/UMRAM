@@ -21,8 +21,8 @@ for filename in os.listdir(base_dir):
     if filename.endswith(".nii"):
         print(filename)
         k=k+1
-        glass_path = os.path.join(glass_dir, 'preproc_glass' + str(k) + '.nii') # Make a new folder for each subject
-        stat_path = os.path.join(stat_dir, 'preproc_stat' + str(k) + '.nii')
+        glass_path = os.path.join(glass_dir, filename +'glass' + '.nii') # Make a new folder for each subject
+        stat_path = os.path.join(stat_dir, filename +'stat' + '.nii')
         if not os.path.exists(glass_path):
             os.mkdir(glass_path)
         if not os.path.exists(stat_path):

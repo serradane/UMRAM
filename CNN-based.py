@@ -22,13 +22,21 @@ for i in datalist:
     if not i in train:
         test.append(i)
 
+# dataliststat = os.listdir(glass_dir)
+# size = len(dataliststat)
+# train = random.sample(dataliststat, int(size*0.8))
+# for i in dataliststat:
+#     if not i in train:
+#         teststat.append(i)
 
 #imagelari split etmek icin 
 def load_imgs(imagePaths, inp_dim):
     data = []
     for imagePath in imagePaths:
-        for images in os.listdir(os.path.join(glass_dir,imagePath)):
-            image = load_img(images, target_size=(inp_dim, inp_dim))
+        for subject in os.listdir(os.path.join(glass_dir,imagePath)):
+            print(subject)
+            subject = os.path.join(os.path.join(glass_dir,imagePath), subject)
+            image = load_img(subject, target_size=(inp_dim, inp_dim, 3))
             image = img_to_array(image)
             data.append(image)
     data = np.array(data, dtype="float32")
@@ -40,7 +48,31 @@ def load_imgs(imagePaths, inp_dim):
 train_data = load_imgs(train, 150)
 test_data= load_imgs(test, 150)
 
+from keras.preprocessing.image import ImageDataGenerator
 
+
+train_datagen = ImageDataGenerator(
+    rescale=1./255,
+    rotation_range=40,
+    width_shift_range=0.2,
+    height_shift_range=0.2,
+    shear_range=0.2,
+    zoom_range=0.2,
+    horizontal_flip=True)
+test_datagen = ImageDataGenerator(rescale=1./255)
+
+
+train_generator = train_datagen.flow_from_directory(
+    train_data,
+    target_size=(150, 150, 3),
+    batch_size=32,
+    class_mode='binary')
+
+test_generator = test_datagen.flow_from_directory(
+    test_data,
+    target_size=(150, 150, 3),
+    batch_size=32,
+    class_mode='binary')
 
 
 # MODEL DEFINITION
@@ -73,36 +105,6 @@ model.compile(loss='binary_crossentropy',
               metrics=['acc'])
 
 
-
-
-
-# Data Preprocessing
-
-from keras.preprocessing.image import ImageDataGenerator
-
-
-train_datagen = ImageDataGenerator(
-    rescale=1./255,
-    rotation_range=40,
-    width_shift_range=0.2,
-    height_shift_range=0.2,
-    shear_range=0.2,
-    zoom_range=0.2,
-    horizontal_flip=True)
-test_datagen = ImageDataGenerator(rescale=1./255)
-
-
-train_generator = train_datagen.flow_from_directory(
-    train_data,
-    target_size=(150, 150),
-    batch_size=32,
-    class_mode='binary')
-
-test_generator = test_datagen.flow_from_directory(
-    test_data,
-    target_size=(150, 150),
-    batch_size=32,
-    class_mode='binary')
 
 history = model.fit_generator(
     train_generator,
