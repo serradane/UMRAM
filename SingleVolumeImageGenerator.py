@@ -11,6 +11,7 @@ from matplotlib import pyplot as plt
 import os, shutil
 
 #datasets.fetch_abide_pcp(data_dir='C:/Users/zehra/Desktop/UMRAM', n_subjects=10, pipeline='cpac', band_pass_filtering=True, global_signal_regression=True, derivatives=['func_preproc'])
+#dx_group
 
 k=0
 base_dir = 'C:/Users/zehra/Desktop/UMRAM/ABIDE_pcp/cpac/filt_global' # Path to the Original Data Directory which includes 4D fMRI images of ASD and TC

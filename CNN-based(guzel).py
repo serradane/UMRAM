@@ -1,5 +1,4 @@
 import os, shutil
-import tensorflow as tf
 from tensorflow.keras import layers
 from tensorflow.keras.preprocessing.image import load_img
 from tensorflow.keras.preprocessing.image import img_to_array
@@ -17,26 +16,14 @@ teststat = []
 datalist = []
 train = []
 test = []
+train_data= []
+test_data = []
+data = []
 glass_dir = 'C:/Users/zehra/Desktop/UMRAM/ABIDE_pcp/Data/glass_brain_images'
 stat_dir = 'C:/Users/zehra/Desktop/UMRAM/ABIDE_pcp/Data/stat_images'
 
-#TODO:glass brain gray scale 
 
-np.random.seed(1234)
 
-datalistglass = os.listdir(glass_dir)
-size = len(datalistglass)
-trainglass = random.sample(datalistglass, int(size*0.8))
-for i in datalistglass:
-    if not i in trainglass:
-        testglass.append(i)
-
-dataliststat = os.listdir(stat_dir)
-size = len(dataliststat)
-trainstat = random.sample(dataliststat, int(size*0.8))
-for i in dataliststat:
-    if not i in trainstat:
-        teststat.append(i)
 
 
 
@@ -56,24 +43,27 @@ def load_imgs(imagePaths, inp_dim, inp_dir):
 # BIG ERROR
 # notice here we might mix images from different subjects since imagePaths is somehow ill defined
 # we need to keep different imagePaths for different subjects
-train_data_glass = load_imgs(trainglass, 150, glass_dir)
-test_data_glass = load_imgs(testglass, 150, glass_dir)
-glass_train_converted = tf.image.rgb_to_grayscale(train_data_glass)
-glass_test_converted = tf.image.rgb_to_grayscale(test_data_glass)
-train_data_stat = load_imgs(trainstat, 150, stat_dir)
-test_data_stat = load_imgs(teststat, 150, stat_dir)
-print(np.shape(train_data_glass))
-for i in range (len(train_data_glass)):
-    train.append(np.concatenate((glass_train_converted[i], train_data_stat[i]), axis=2))
+datalistglass = os.listdir(glass_dir)
+dataliststat = os.listdir(stat_dir)
 
-for i in range (len(test_data_glass)):
-    test.append(np.concatenate((glass_test_converted[i], test_data_stat[i]), axis=2))
+data_glass = load_imgs(datalistglass, 150, glass_dir)
+data_stat= load_imgs(dataliststat, 150, stat_dir)
 
-from keras.preprocessing.image import ImageDataGenerator
+
+
+for i in range (len(datalistglass)):
+    data.append(np.concatenate((data_glass[i], data_stat[i]), axis=1))
+
+
+size = len(data)
+train_data = random.sample(data, int(size*0.8))
+for i in data:
+    if not i in train_data:
+        test_data.append(i)
 
 
 train_datagen = ImageDataGenerator(
-    rescale=1./255,
+    #rescale=1./255,
     rotation_range=40,
     width_shift_range=0.2,
     height_shift_range=0.2,
@@ -82,10 +72,9 @@ train_datagen = ImageDataGenerator(
     horizontal_flip=True)
 test_datagen = ImageDataGenerator(rescale=1./255)
 
-train = np.array(train)
-test = np.array(test)
-print(np.shape(train))
-print(np.shape(test))
+train = np.array(train_data)
+test = np.array(test_data)
+
 train_generator = train_datagen.flow(
     train,
     train,
@@ -103,8 +92,7 @@ test_generator = test_datagen.flow(
     )
 
 
-print(train_generator)
-print(test_generator)
+
 
 # MODEL DEFINITION
 
@@ -114,7 +102,7 @@ from keras import models
 
 model = models.Sequential()
 model.add(layers.Conv2D(32, (3, 3), activation='relu',
-                        input_shape=(150, 150, 4)))
+                        input_shape=(150, 150, 3, 3)))
 model.add(layers.MaxPooling2D(2, 2))
 model.add(layers.Conv2D(64, (3, 3), activation='relu'))
 model.add(layers.MaxPooling2D(2, 2))
