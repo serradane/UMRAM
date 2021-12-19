@@ -7,6 +7,10 @@ from sklearn.preprocessing import LabelBinarizer
 from imutils import paths
 import numpy as np
 import random
+import matplotlib.pyplot as plt
+from nilearn import image
+from nilearn.image import iter_img
+
 
 
 # LOADING IMAGES
@@ -14,30 +18,62 @@ import random
 # here base_dir will be 
 testglass = []
 teststat = []
+testglass_asd = []
+testglass_control = []
+teststat_asd = []
+teststat_control = []
+trainglass_control = []
+trainglass_asd = []
+trainstat_control = []
+trainstat_asd = []
 datalist = []
 train = []
 test = []
-glass_dir = 'C:/Users/zehra/Desktop/UMRAM/ABIDE_pcp/Data/glass_brain_images'
-stat_dir = 'C:/Users/zehra/Desktop/UMRAM/ABIDE_pcp/Data/stat_images'
+labels_test = []
+labels_train = []
+test_data_stat = []
+#file isimleri asd icin
+glass_dir_asd = 'C:/Users/zehra/Desktop/UMRAM/ABIDE_pcp/Data/glass_brain_images'
+stat_dir_asd = 'C:/Users/zehra/Desktop/UMRAM/ABIDE_pcp/Data/stat_images'
+glass_dir_control = 'C:/Users/zehra/Desktop/UMRAM/ABIDE_pcp/Data/glass_brain_control'
+stat_dir_control = 'C:/Users/zehra/Desktop/UMRAM/ABIDE_pcp/Data/stat_control'
 
-#TODO:glass brain gray scale 
+#TODO:bu kismin aynisini kontrol icin de yap ve array tut 0-1 label 0 control icin olacak okurken takibini yap ya da image generate ederken isminde yaz listedeki isimlerden
+#tekrar arraye labellari doldurmak.
 
 np.random.seed(1234)
 
-datalistglass = os.listdir(glass_dir)
-size = len(datalistglass)
-trainglass = random.sample(datalistglass, int(size*0.8))
-for i in datalistglass:
-    if not i in trainglass:
-        testglass.append(i)
+datalistglassasd = os.listdir(glass_dir_asd)
+datalistglasscontrol = os.listdir(glass_dir_control)
+dataliststatasd = os.listdir(stat_dir_asd)
+dataliststatcontrol = os.listdir(stat_dir_control)
 
-dataliststat = os.listdir(stat_dir)
-size = len(dataliststat)
-trainstat = random.sample(dataliststat, int(size*0.8))
-for i in dataliststat:
-    if not i in trainstat:
-        teststat.append(i)
+# datalistglass = datalistglasscontrol + datalistglassasd
+# dataliststat = dataliststatasd + dataliststatcontrol
 
+size = len(datalistglassasd)
+trainglass_asd = random.sample(datalistglassasd, int(size*0.8))
+for i in datalistglassasd:
+    if not i in trainglass_asd:
+        testglass_asd.append(i)
+
+size = len(dataliststatasd)
+trainstat_asd = random.sample(dataliststatasd, int(size*0.8))
+for i in dataliststatasd:
+    if not i in trainstat_asd:
+        teststat_asd.append(i)
+
+size = len(datalistglasscontrol)
+trainglass_control = random.sample(datalistglasscontrol, int(size*0.8))
+for i in datalistglasscontrol:
+    if not i in trainglass_control:
+        testglass_control.append(i)
+
+size = len(dataliststatcontrol)
+trainstat_control = random.sample(dataliststatcontrol, int(size*0.8))
+for i in dataliststatcontrol:
+    if not i in trainstat_control:
+        teststat_control.append(i)
 
 
 #imagelari split etmek icin 
@@ -56,12 +92,38 @@ def load_imgs(imagePaths, inp_dim, inp_dir):
 # BIG ERROR
 # notice here we might mix images from different subjects since imagePaths is somehow ill defined
 # we need to keep different imagePaths for different subjects
-train_data_glass = load_imgs(trainglass, 150, glass_dir)
-test_data_glass = load_imgs(testglass, 150, glass_dir)
+train_data_glass_asd = load_imgs(trainglass_asd, 150, glass_dir_asd)
+test_data_glass_asd = load_imgs(testglass_asd, 150, glass_dir_asd)
+
+train_data_glass_c = load_imgs(trainglass_control, 150, glass_dir_control)
+test_data_glass_c = load_imgs(testglass_control, 150, glass_dir_control)
+
+train_data_glass = np.concatenate((train_data_glass_asd, train_data_glass_c), axis = 0)
+for i in enumerate(train_data_glass_asd):
+    labels_train.append(1)
+for i in enumerate(train_data_glass_c):
+    labels_train.append(0)
+
+test_data_glass = np.concatenate((test_data_glass_asd, test_data_glass_c), axis = 0)
+for i in enumerate(test_data_glass_asd):
+    labels_test.append(1)
+for i in enumerate(test_data_glass_c):
+    labels_test.append(0)
+
 glass_train_converted = tf.image.rgb_to_grayscale(train_data_glass)
 glass_test_converted = tf.image.rgb_to_grayscale(test_data_glass)
-train_data_stat = load_imgs(trainstat, 150, stat_dir)
-test_data_stat = load_imgs(teststat, 150, stat_dir)
+
+train_data_stat_asd = load_imgs(trainstat_asd, 150, stat_dir_asd)
+test_data_stat_asd = load_imgs(teststat_asd, 150, stat_dir_asd)
+
+train_data_stat_control = load_imgs(trainstat_control, 150, stat_dir_control)
+test_data_stat_control = load_imgs(teststat_control, 150, stat_dir_control)
+
+print(np.shape(train_data_stat_asd))
+print(np.shape(train_data_stat_control))
+train_data_stat = np.concatenate((train_data_stat_asd, train_data_stat_control), axis = 0)
+test_data_stat = np.concatenate((test_data_stat_asd, test_data_stat_control), axis = 0)
+
 print(np.shape(train_data_glass))
 for i in range (len(train_data_glass)):
     train.append(np.concatenate((glass_train_converted[i], train_data_stat[i]), axis=2))
@@ -82,13 +144,22 @@ train_datagen = ImageDataGenerator(
     horizontal_flip=True)
 test_datagen = ImageDataGenerator(rescale=1./255)
 
+
 train = np.array(train)
 test = np.array(test)
 print(np.shape(train))
 print(np.shape(test))
+
+print(labels_train)
+print(labels_test)
+print(len(labels_train))
+print(len(labels_test))
+
+
+
 train_generator = train_datagen.flow(
     train,
-    train,
+    labels_train,
     #target_size=(150, 150, 3),
     batch_size=32,
     #class_mode='binary'
@@ -96,11 +167,13 @@ train_generator = train_datagen.flow(
 
 test_generator = test_datagen.flow(
     test,
-    test,
+    labels_test,
     #target_size=(150, 150, 3),
     batch_size=32,
     #class_mode='binary'
     )
+
+#plt.imshow(image[:,:,:3]) ve plt.imshow(image[:,:,3]) train_generator'da olusan image'a benzer seyler cikiyor mu?
 
 
 print(train_generator)
