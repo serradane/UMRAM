@@ -14,12 +14,13 @@ import os, shutil
 #dx_group
 #datasets.fetch_abide_pcp(data_dir = 'C:/Users/zehra/Desktop/UMRAM', n_subjects = 10, pipeline = 'cpac', band_pass_filtering =True, global_signal_regression=True, derivatives=['func_preproc'], DX_GROUP=2)
 
-#base_dir_asd = 'C:/Users/zehra/Desktop/UMRAM/ABIDE_pcp/cpac/filt_global' # Path to the Original Data Directory which includes 4D fMRI images of ASD
-#glass_dir_asd = 'C:/Users/zehra/Desktop/UMRAM/ABIDE_pcp/Data/glass_brain_images'
-#stat_dir_asd = 'C:/Users/zehra/Desktop/UMRAM/ABIDE_pcp/Data/stat_images'
-base_dir_control = 'C:/Users/zehra/Desktop/UMRAM/ABIDE_pcp/cpac/filt_global/Control' # Path to the Original Data Directory which includes 4D fMRI images of TC
-glass_dir_control = 'C:/Users/zehra/Desktop/UMRAM/ABIDE_pcp/Data/glass_brain_control'
-stat_dir_control = 'C:/Users/zehra/Desktop/UMRAM/ABIDE_pcp/Data/stat_control'
+
+# base_dir_asd = '/auto/data2/zdane/serra/ABIDE1/Asd/Outputs/cpac/filt_global/func_preproc' # Path to the Original Data Directory which includes 4D fMRI images of ASD
+# glass_dir_asd = '/auto/data2/zdane/serra/Preprocessed/glass_asd_1'
+# stat_dir_asd = '/auto/data2/zdane/serra/Preprocessed/stat_asd_1'
+base_dir_control = '/auto/data2/zdane/serra/ABIDE1/Control/Outputs/cpac/filt_global/func_preproc' # Path to the Original Data Directory which includes 4D fMRI images of TC
+glass_dir_control = '/auto/data2/zdane/serra/Preprocessed/glass_control'
+stat_dir_control = '/auto/data2/zdane/serra/Preprocessed/stat_control'
 
 # for filename in os.listdir(base_dir_asd):
 #     if filename.endswith(".nii"):

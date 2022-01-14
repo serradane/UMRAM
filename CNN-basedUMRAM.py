@@ -33,13 +33,11 @@ labels_test = []
 labels_train = []
 test_data_stat = []
 #file isimleri asd icin
-glass_dir_asd = 'C:/Users/zehra/Desktop/UMRAM/ABIDE_pcp/Data/glass_brain_images'
-stat_dir_asd = 'C:/Users/zehra/Desktop/UMRAM/ABIDE_pcp/Data/stat_images'
-glass_dir_control = 'C:/Users/zehra/Desktop/UMRAM/ABIDE_pcp/Data/glass_brain_control'
-stat_dir_control = 'C:/Users/zehra/Desktop/UMRAM/ABIDE_pcp/Data/stat_control'
+glass_dir_asd = '/auto/data2/zdane/serra/Preprocessed/glass_asd_1'
+stat_dir_asd = '/auto/data2/zdane/serra/Preprocessed/stat_asd_1'
+glass_dir_control = '/auto/data2/zdane/serra/Preprocessed/glass_control'
+stat_dir_control = '/auto/data2/zdane/serra/Preprocessed/stat_control'
 
-#TODO:bu kismin aynisini kontrol icin de yap ve array tut 0-1 label 0 control icin olacak okurken takibini yap ya da image generate ederken isminde yaz listedeki isimlerden
-#tekrar arraye labellari doldurmak.
 
 np.random.seed(1234)
 
@@ -89,9 +87,6 @@ def load_imgs(imagePaths, inp_dim, inp_dir):
     data = np.array(data, dtype="float32")
     return data
 
-# BIG ERROR
-# notice here we might mix images from different subjects since imagePaths is somehow ill defined
-# we need to keep different imagePaths for different subjects
 train_data_glass_asd = load_imgs(trainglass_asd, 150, glass_dir_asd)
 test_data_glass_asd = load_imgs(testglass_asd, 150, glass_dir_asd)
 
