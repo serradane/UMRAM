@@ -87,161 +87,168 @@ def load_imgs(imagePaths, inp_dim, inp_dir):
     data = np.array(data, dtype="float32")
     return data
 
-train_data_glass_asd = load_imgs(trainglass_asd, 150, glass_dir_asd)
-test_data_glass_asd = load_imgs(testglass_asd, 150, glass_dir_asd)
+for i in range(300):
+    for i in range(int(len(trainglass_asd)/100)):
+        train_data_glass_asd = load_imgs(trainglass_asd[i*100:(i+1)*100-1], 150, glass_dir_asd)
+        test_data_glass_asd = load_imgs(testglass_asd, 150, glass_dir_asd)
 
-train_data_glass_c = load_imgs(trainglass_control, 150, glass_dir_control)
-test_data_glass_c = load_imgs(testglass_control, 150, glass_dir_control)
+        train_data_glass_c = load_imgs(trainglass_control[i*100:(i+1)*100-1], 150, glass_dir_control)
+        test_data_glass_c = load_imgs(testglass_control, 150, glass_dir_control)
 
-train_data_glass = np.concatenate((train_data_glass_asd, train_data_glass_c), axis = 0)
-for i in enumerate(train_data_glass_asd):
-    labels_train.append(1)
-for i in enumerate(train_data_glass_c):
-    labels_train.append(0)
+        train_data_glass = np.concatenate((train_data_glass_asd, train_data_glass_c), axis = 0)
+        for i in enumerate(train_data_glass_asd):
+            labels_train.append(1)
+        for i in enumerate(train_data_glass_c):
+            labels_train.append(0)
 
-test_data_glass = np.concatenate((test_data_glass_asd, test_data_glass_c), axis = 0)
-for i in enumerate(test_data_glass_asd):
-    labels_test.append(1)
-for i in enumerate(test_data_glass_c):
-    labels_test.append(0)
+        test_data_glass = np.concatenate((test_data_glass_asd, test_data_glass_c), axis = 0)
+        for i in enumerate(test_data_glass_asd):
+            labels_test.append(1)
+        for i in enumerate(test_data_glass_c):
+            labels_test.append(0)
 
-glass_train_converted = tf.image.rgb_to_grayscale(train_data_glass)
-glass_test_converted = tf.image.rgb_to_grayscale(test_data_glass)
+        glass_train_converted = tf.image.rgb_to_grayscale(train_data_glass)
+        glass_test_converted = tf.image.rgb_to_grayscale(test_data_glass)
 
-train_data_stat_asd = load_imgs(trainstat_asd, 150, stat_dir_asd)
-test_data_stat_asd = load_imgs(teststat_asd, 150, stat_dir_asd)
+        train_data_stat_asd = load_imgs(trainstat_asd, 150, stat_dir_asd)
+        test_data_stat_asd = load_imgs(teststat_asd, 150, stat_dir_asd)
 
-train_data_stat_control = load_imgs(trainstat_control, 150, stat_dir_control)
-test_data_stat_control = load_imgs(teststat_control, 150, stat_dir_control)
+        train_data_stat_control = load_imgs(trainstat_control, 150, stat_dir_control)
+        test_data_stat_control = load_imgs(teststat_control, 150, stat_dir_control)
 
-print(np.shape(train_data_stat_asd))
-print(np.shape(train_data_stat_control))
-train_data_stat = np.concatenate((train_data_stat_asd, train_data_stat_control), axis = 0)
-test_data_stat = np.concatenate((test_data_stat_asd, test_data_stat_control), axis = 0)
+        print(np.shape(train_data_stat_asd))
+        print(np.shape(train_data_stat_control))
+        train_data_stat = np.concatenate((train_data_stat_asd, train_data_stat_control), axis = 0)
+        test_data_stat = np.concatenate((test_data_stat_asd, test_data_stat_control), axis = 0)
 
-print(np.shape(train_data_glass))
-for i in range (len(train_data_glass)):
-    train.append(np.concatenate((glass_train_converted[i], train_data_stat[i]), axis=2))
+        print(np.shape(train_data_glass))
+        for i in range (len(train_data_glass)):
+            train.append(np.concatenate((glass_train_converted[i], train_data_stat[i]), axis=2))
 
-for i in range (len(test_data_glass)):
-    test.append(np.concatenate((glass_test_converted[i], test_data_stat[i]), axis=2))
+        for i in range (len(test_data_glass)):
+            test.append(np.concatenate((glass_test_converted[i], test_data_stat[i]), axis=2))
 
-from keras.preprocessing.image import ImageDataGenerator
-
-
-train_datagen = ImageDataGenerator(
-    rescale=1./255,
-    rotation_range=40,
-    width_shift_range=0.2,
-    height_shift_range=0.2,
-    shear_range=0.2,
-    zoom_range=0.2,
-    horizontal_flip=True)
-test_datagen = ImageDataGenerator(rescale=1./255)
+        from keras.preprocessing.image import ImageDataGenerator
 
 
-train = np.array(train)
-test = np.array(test)
-print(np.shape(train))
-print(np.shape(test))
-
-print(labels_train)
-print(labels_test)
-print(len(labels_train))
-print(len(labels_test))
-
-
-
-train_generator = train_datagen.flow(
-    train,
-    labels_train,
-    #target_size=(150, 150, 3),
-    batch_size=32,
-    #class_mode='binary'
-    )
-
-test_generator = test_datagen.flow(
-    test,
-    labels_test,
-    #target_size=(150, 150, 3),
-    batch_size=32,
-    #class_mode='binary'
-    )
-
-#plt.imshow(image[:,:,:3]) ve plt.imshow(image[:,:,3]) train_generator'da olusan image'a benzer seyler cikiyor mu?
-
-imgs, labels = next(train_generator)
-
-plt.imshow(imgs[0][:,:,:3])
-plt.imshow(imgs[0][:,:,3])
-plt.show()
-print(labels)
+        train_datagen = ImageDataGenerator(
+            rescale=1./255,
+            rotation_range=40,
+            width_shift_range=0.2,
+            height_shift_range=0.2,
+            shear_range=0.2,
+            zoom_range=0.2,
+            horizontal_flip=True)
+        test_datagen = ImageDataGenerator(rescale=1./255)
 
 
-# MODEL DEFINITION
+        train = np.array(train)
+        test = np.array(test)
+        print(np.shape(train))
+        print(np.shape(test))
 
-from tensorflow import keras
-from keras import layers
-from keras import models
-
-model = models.Sequential()
-model.add(layers.Conv2D(32, (3, 3), activation='relu',
-                        input_shape=(150, 150, 4)))
-model.add(layers.MaxPooling2D(2, 2))
-model.add(layers.Conv2D(64, (3, 3), activation='relu'))
-model.add(layers.MaxPooling2D(2, 2))
-model.add(layers.Conv2D(128, (3, 3), activation='relu'))
-model.add(layers.MaxPooling2D(2, 2))
-model.add(layers.Conv2D(128, (3, 3), activation='relu'))
-model.add(layers.MaxPooling2D(2, 2))
-model.add(layers.Flatten())
-model.add(layers.Dropout(0.5))
-model.add(layers.Dense(512, activation='relu'))
-model.add(layers.Dense(1, activation='sigmoid'))
-
-print(model.summary())
-
-from tensorflow.keras import optimizers
-
-model.compile(loss='binary_crossentropy',
-              optimizer=optimizers.RMSprop(lr=1e-4),
-              metrics=['acc'])
+        print(labels_train)
+        print(labels_test)
+        print(len(labels_train))
+        print(len(labels_test))
 
 
 
-history = model.fit_generator(
-    train_generator,
-    steps_per_epoch=100,
-    epochs=300,
-    validation_data=test_generator,
-    validation_steps=50)
+        train_generator = train_datagen.flow(
+            train,
+            labels_train,
+            )
+
+        test_generator = test_datagen.flow(
+            test,
+            labels_test,
+            )
+
+        #plt.imshow(image[:,:,:3]) ve plt.imshow(image[:,:,3]) train_generator'da olusan image'a benzer seyler cikiyor mu?
+
+        imgs, labels = next(train_generator)
+
+        plt.imshow(imgs[0][:,:,:3])
+        plt.imshow(imgs[0][:,:,3])
+        plt.show()
+        print(labels)
+
+
+        # MODEL DEFINITION
+
+        from tensorflow import keras
+        from keras import layers
+        from keras import models
+
+        model = models.Sequential()
+        model.add(layers.Conv2D(32, (3, 3), activation='relu',
+                                input_shape=(150, 150, 4)))
+        model.add(layers.MaxPooling2D(2, 2))
+        model.add(layers.Conv2D(64, (3, 3), activation='relu'))
+        model.add(layers.MaxPooling2D(2, 2))
+        model.add(layers.Conv2D(128, (3, 3), activation='relu'))
+        model.add(layers.MaxPooling2D(2, 2))
+        model.add(layers.Conv2D(128, (3, 3), activation='relu'))
+        model.add(layers.MaxPooling2D(2, 2))
+        model.add(layers.Flatten())
+        model.add(layers.Dropout(0.5))
+        model.add(layers.Dense(512, activation='relu'))
+        model.add(layers.Dense(1, activation='sigmoid'))
+
+        print(model.summary())
+
+        from tensorflow.keras import optimizers
+
+        model.compile(loss='binary_crossentropy',
+                    optimizer=optimizers.RMSprop(lr=1e-4),
+                    metrics=['acc'])
+
+        checkpoint_path = "auto/data2/zdane/training_1/cp.ckpt"
+        checkpoint_dir = os.path.dirname(checkpoint_path)
+
+        # Create a callback that saves the model's weights
+        cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
+                                                        save_weights_only=True,
+                                                        verbose=1)
+
+        #epoch basta 1 olacak 
+        history = model.fit_generator(
+            train_generator,
+            batch_size = 100,
+            steps_per_epoch=100,
+            epochs=1,
+            validation_data=test_generator,
+            validation_steps=50,
+            callbacks=[cp_callback])
 
 
 
 
-# PLOTTING WHAT HAPPENED DURING TRAINING
+        # PLOTTING WHAT HAPPENED DURING TRAINING
 
-import matplotlib.pyplot as plt
+        import matplotlib.pyplot as plt
 
-acc = history.history['acc']
-val_acc = history.history['val_acc']
-loss = history.history['loss']
-val_loss = history.history['val_loss']
+        acc = history.history['acc']
+        val_acc = history.history['val_acc']
+        loss = history.history['loss']
+        val_loss = history.history['val_loss']
 
-epochs = range(1, len(acc) + 1)
+        epochs = range(1, len(acc) + 1)
 
-plt.plot(epochs, acc, 'bo', label='Training Accuracy')
-plt.plot(epochs, val_acc, 'b', label='Validation Accuracy')
-plt.title('Training and Validation Accuracy')
-plt.legend()
-plt.figure()
+        plt.plot(epochs, acc, 'bo', label='Training Accuracy')
+        plt.plot(epochs, val_acc, 'b', label='Validation Accuracy')
+        plt.title('Training and Validation Accuracy')
+        plt.legend()
+        plt.figure()
 
-plt.plot(epochs, loss, 'bo', label='Training Loss')
-plt.plot(epochs, val_loss, 'b', label='Validation Loss')
-plt.title('Training and Validation Loss')
-plt.legend()
+        plt.plot(epochs, loss, 'bo', label='Training Loss')
+        plt.plot(epochs, val_loss, 'b', label='Validation Loss')
+        plt.title('Training and Validation Loss')
+        plt.legend()
 
-plt.show()
+        plt.show()
+
+
 
 
 
