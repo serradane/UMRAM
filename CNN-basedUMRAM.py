@@ -27,10 +27,6 @@ trainglass_asd = []
 trainstat_control = []
 trainstat_asd = []
 datalist = []
-train = []
-test = []
-labels_test = []
-labels_train = []
 test_data_stat = []
 #file isimleri asd icin
 glass_dir_asd = '/auto/data2/zdane/serra/Preprocessed/glass_asd_1'
@@ -89,6 +85,11 @@ def load_imgs(imagePaths, inp_dim, inp_dir):
 
 for i in range(300):
     for i in range(int(len(trainglass_asd)/100)):
+        train = []
+        test = []
+        labels_test = []
+        labels_train = []
+        print("Beginning of the inner for loop")
         train_data_glass_asd = load_imgs(trainglass_asd[i*100:(i+1)*100-1], 150, glass_dir_asd)
         test_data_glass_asd = load_imgs(testglass_asd, 150, glass_dir_asd)
 
